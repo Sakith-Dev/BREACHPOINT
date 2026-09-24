@@ -1,0 +1,9 @@
+# Ignore local environment variables and database storage
+.env
+*.log
+.DS_Store
+
+# Ignore Docker persistent mount folders if mounted locally
+mariadb_data/
+redis_data/
+uploads/

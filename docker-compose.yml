@@ -1,0 +1,69 @@
+version: '3.8'
+
+networks:
+  ctf_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.18.0.0/16
+          gateway: 172.18.0.1
+
+volumes:
+  mariadb_data:
+  redis_data:
+
+services:
+  ctfd_platform:
+    image: ctfd/ctfd:3.7.0
+    container_name: ctfd_platform
+    user: ctfd
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - UPLOAD_FOLDER=/var/uploads
+      - DATABASE_URL=mysql+pymysql://ctfd:ctfd_pass_2026@mariadb_db:3306/ctfd
+      - REDIS_URL=redis://redis_cache:6379
+    networks:
+      ctf_net:
+        ipv4_address: 172.18.0.2
+    depends_on:
+      - mariadb_db
+      - redis_cache
+
+  mariadb_db:
+    image: mariadb:10.6
+    container_name: mariadb_db
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=root_root_pw_2026
+      - MYSQL_USER=ctfd
+      - MYSQL_PASSWORD=ctfd_pass_2026
+      - MYSQL_DATABASE=ctfd
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    networks:
+      ctf_net:
+        ipv4_address: 172.18.0.3
+
+  redis_cache:
+    image: redis:7.0-alpine
+    container_name: redis_cache
+    restart: always
+    volumes:
+      - redis_data:/data
+    networks:
+      ctf_net:
+        ipv4_address: 172.18.0.4
+
+  nexacore_target:
+    image: nginx:1.24-alpine
+    container_name: nexacore_target
+    restart: always
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nexacore_web:/usr/share/nginx/html:ro
+    networks:
+      ctf_net:
+        ipv4_address: 172.18.0.5
