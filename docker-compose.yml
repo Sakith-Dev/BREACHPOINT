@@ -13,7 +13,6 @@ volumes:
   redis_data:
 
 services:
-  # PLATFORM LAYER (Teammate's Architecture)
   ctfd_platform:
     image: ctfd/ctfd:3.7.0
     container_name: ctfd_platform
@@ -57,8 +56,6 @@ services:
       ctf_net:
         ipv4_address: 172.18.0.4
 
-
-  # CHALLENGE LAYER (Your Isolated Microservices)
   nexacore_stage1:
     image: nginx:1.24-alpine
     container_name: nexacore_stage1
@@ -95,16 +92,17 @@ services:
       ctf_net:
         ipv4_address: 172.18.0.12
 
-  # STG-04: Uncomment this once your teammate uploads the HR Portal code and Dockerfile
-  # nexacore_stage4:
-  #   build: ./stage4-web
-  #   container_name: nexacore_stage4
-  #   restart: always
-  #   ports:
-  #     - "8083:80"
-  #   networks:
-  #     ctf_net:
-  #       ipv4_address: 172.18.0.13
+  nexacore_stage4:
+    build: ./stage4-web
+    container_name: nexacore_stage4
+    restart: always
+    ports:
+      - "8083:80"
+    volumes:
+      - ./stage4-web/html:/usr/share/nginx/html
+    networks:
+      ctf_net:
+        ipv4_address: 172.18.0.13
 
   nexacore_stage5:
     image: nginx:1.24-alpine
