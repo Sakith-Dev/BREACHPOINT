@@ -13,6 +13,7 @@ volumes:
   redis_data:
 
 services:
+  # PLATFORM LAYER (Teammate's Architecture)
   ctfd_platform:
     image: ctfd/ctfd:3.7.0
     container_name: ctfd_platform
@@ -56,14 +57,75 @@ services:
       ctf_net:
         ipv4_address: 172.18.0.4
 
-  nexacore_target:
+
+  # CHALLENGE LAYER (Your Isolated Microservices)
+  nexacore_stage1:
     image: nginx:1.24-alpine
-    container_name: nexacore_target
+    container_name: nexacore_stage1
     restart: always
     ports:
       - "8080:80"
     volumes:
-      - ./nexacore_web:/usr/share/nginx/html:ro
+      - ./stage1-osint/html:/usr/share/nginx/html:ro
     networks:
       ctf_net:
-        ipv4_address: 172.18.0.5
+        ipv4_address: 172.18.0.10
+
+  nexacore_stage2:
+    image: nginx:1.24-alpine
+    container_name: nexacore_stage2
+    restart: always
+    ports:
+      - "8081:80"
+    volumes:
+      - ./stage2-stegano/html:/usr/share/nginx/html:ro
+    networks:
+      ctf_net:
+        ipv4_address: 172.18.0.11
+
+  nexacore_stage3:
+    image: nginx:1.24-alpine
+    container_name: nexacore_stage3
+    restart: always
+    ports:
+      - "8082:80"
+    volumes:
+      - ./stage3-crypto/html:/usr/share/nginx/html:ro
+    networks:
+      ctf_net:
+        ipv4_address: 172.18.0.12
+
+  # STG-04: Uncomment this once your teammate uploads the HR Portal code and Dockerfile
+  # nexacore_stage4:
+  #   build: ./stage4-web
+  #   container_name: nexacore_stage4
+  #   restart: always
+  #   ports:
+  #     - "8083:80"
+  #   networks:
+  #     ctf_net:
+  #       ipv4_address: 172.18.0.13
+
+  nexacore_stage5:
+    image: nginx:1.24-alpine
+    container_name: nexacore_stage5
+    restart: always
+    ports:
+      - "8084:80"
+    volumes:
+      - ./stage5-forensics/html:/usr/share/nginx/html:ro
+    networks:
+      ctf_net:
+        ipv4_address: 172.18.0.14
+
+  nexacore_stage6:
+    image: nginx:1.24-alpine
+    container_name: nexacore_stage6
+    restart: always
+    ports:
+      - "8085:80"
+    volumes:
+      - ./stage6-networking/html:/usr/share/nginx/html:ro
+    networks:
+      ctf_net:
+        ipv4_address: 172.18.0.15
